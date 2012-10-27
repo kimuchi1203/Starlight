@@ -16,13 +16,14 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.Window;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 public class MainActivity extends Activity {
-	private static final String CONSUMER_KEY = null;
-	private static final String CONSUMER_SECRET = null;
+	private static final String CONSUMER_KEY = "";
+	private static final String CONSUMER_SECRET = "";
 	private static final String CALLBACK_URL = "callback://host";
 	private static final String OAUTH_VERIFIER = "oauth_verifier";
 	private static final String KEY_TOKEN = "token";
@@ -34,10 +35,11 @@ public class MainActivity extends Activity {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
 		setContentView(R.layout.activity_main);
-
-		twitter = new TwitterFactory().getInstance();
-		twitter.setOAuthConsumer(CONSUMER_KEY, CONSUMER_SECRET);
+		getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE, R.layout.custom_title);
+		
+		
 
 		// start OAuth button
 		Button btn = (Button) this.findViewById(R.id.login);
@@ -60,6 +62,8 @@ public class MainActivity extends Activity {
 
 	private void doOAuth() {
 		try {
+			twitter = new TwitterFactory().getInstance();
+			twitter.setOAuthConsumer(CONSUMER_KEY, CONSUMER_SECRET);
 			requestToken = twitter.getOAuthRequestToken(CALLBACK_URL);
 			String url = requestToken.getAuthorizationURL();
 			this.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
@@ -86,8 +90,7 @@ public class MainActivity extends Activity {
 				editor.putString(KEY_TOKEN, accessToken.getToken());
 				editor.putString(KEY_TOKEN_SECRET, accessToken.getTokenSecret());
 				editor.commit();
-				Log.v("twitter", "token " + accessToken.getToken() + " secret "
-						+ accessToken.getTokenSecret());
+
 				showHomeTimeline();
 			} catch (TwitterException e) {
 				android.util.Log.e("TwitterException", e.toString());
@@ -100,6 +103,8 @@ public class MainActivity extends Activity {
 		String key = pref.getString(KEY_TOKEN, null);
 		String secret = pref.getString(KEY_TOKEN_SECRET, null);
 		if ((key != null) && (secret != null)) {
+			twitter = new TwitterFactory().getInstance();
+			twitter.setOAuthConsumer(CONSUMER_KEY, CONSUMER_SECRET);
 			twitter.setOAuthAccessToken(new AccessToken(key, secret));
 			return true;
 		} else {
