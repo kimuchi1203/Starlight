@@ -27,4 +27,9 @@
         <item name="android:background">#555555</item>
     </style>
 
+    <style name="TextAppearance">
+        <item name="android:textColor">#ffffff</item>
+        <item name="android:textSize">12sp</item>
+    </style>
+    
 </resources>

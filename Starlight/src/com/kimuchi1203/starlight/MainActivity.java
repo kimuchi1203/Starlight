@@ -18,8 +18,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.Window;
 import android.widget.Button;
-import android.widget.LinearLayout;
-import android.widget.TextView;
+import android.widget.ListView;
 
 public class MainActivity extends Activity {
 	private static final String CONSUMER_KEY = "";
@@ -31,6 +30,7 @@ public class MainActivity extends Activity {
 
 	private Twitter twitter;
 	private RequestToken requestToken;
+	private TweetListAdapter adapter;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -39,8 +39,6 @@ public class MainActivity extends Activity {
 		setContentView(R.layout.activity_main);
 		getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE, R.layout.custom_title);
 		
-		
-
 		// start OAuth button
 		Button btn = (Button) this.findViewById(R.id.login);
 		btn.setOnClickListener(new OnClickListener() {
@@ -113,26 +111,19 @@ public class MainActivity extends Activity {
 	}
 
 	private void showHomeTimeline() {
+		Log.v("twitter", "authenticated");
 		try {
 			ResponseList<Status> home = twitter.getHomeTimeline();
-			LinearLayout tweet_list = (LinearLayout) this
-					.findViewById(R.id.tweet_list);
+			adapter = new TweetListAdapter(this, R.layout.tweet_list);
 			for (int i = 0; i < home.size(); ++i) {
-				tweet_list.addView(createTweetView(home.get(i)));
+				Log.v("twitter", home.get(i).getText());
+				adapter.add(home.get(i));
 			}
+			ListView tweet_list = (ListView) this.findViewById(R.id.tweet_list);
+			tweet_list.setAdapter(adapter);
 		} catch (TwitterException e) {
 			e.printStackTrace();
 		}
 
-	}
-
-	private View createTweetView(Status status) {
-		LinearLayout tweet = new LinearLayout(this);
-		tweet.setOrientation(LinearLayout.HORIZONTAL);
-
-		TextView text = new TextView(this);
-		text.setText(status.getText());
-		tweet.addView(text);
-		return tweet;
 	}
 }
