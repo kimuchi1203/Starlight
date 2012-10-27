@@ -7,7 +7,7 @@
         android:id="@+id/icon"
         android:layout_width="32dp"
         android:layout_height="32dp"
-        android:src="@drawable/ic_launcher"
+        android:background="#FFFFFF"
         android:contentDescription="@string/icon" />
 	<TextView
 	    android:id="@+id/text"
