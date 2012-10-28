@@ -1,5 +1,6 @@
 package com.kimuchi1203.starlight;
 
+import twitter4j.Paging;
 import twitter4j.ResponseList;
 import twitter4j.Status;
 import twitter4j.Twitter;
@@ -8,6 +9,7 @@ import twitter4j.TwitterFactory;
 import twitter4j.auth.AccessToken;
 import twitter4j.auth.RequestToken;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.app.Activity;
 import android.content.Intent;
@@ -31,14 +33,23 @@ public class MainActivity extends Activity {
 	private Twitter twitter;
 	private RequestToken requestToken;
 	private TweetListAdapter adapter;
+	private long lastId;
+	private AsyncTask<Void, Void, ResponseList<Status>> loadTask;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
 		setContentView(R.layout.activity_main);
-		getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE, R.layout.custom_title);
-		
+		getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE,
+				R.layout.custom_title);
+
+		lastId = 0;
+		loadTask = null;
+		adapter = new TweetListAdapter(this, R.layout.tweet_list);
+		ListView tweet_list = (ListView) this.findViewById(R.id.tweet_list);
+		tweet_list.setAdapter(adapter);
+
 		// start OAuth button
 		Button btn = (Button) this.findViewById(R.id.login);
 		btn.setOnClickListener(new OnClickListener() {
@@ -48,7 +59,7 @@ public class MainActivity extends Activity {
 		});
 
 		if (loadToken()) {
-			showHomeTimeline();
+			updateHomeTimeline();
 		}
 	}
 
@@ -89,7 +100,7 @@ public class MainActivity extends Activity {
 				editor.putString(KEY_TOKEN_SECRET, accessToken.getTokenSecret());
 				editor.commit();
 
-				showHomeTimeline();
+				updateHomeTimeline();
 			} catch (TwitterException e) {
 				android.util.Log.e("TwitterException", e.toString());
 			}
@@ -110,20 +121,105 @@ public class MainActivity extends Activity {
 		}
 	}
 
-	private void showHomeTimeline() {
-		Log.v("twitter", "authenticated");
-		try {
-			ResponseList<Status> home = twitter.getHomeTimeline();
-			adapter = new TweetListAdapter(this, R.layout.tweet_list);
-			for (int i = 0; i < home.size(); ++i) {
-				Log.v("twitter", home.get(i).getText());
-				adapter.add(home.get(i));
+	public void showHeader() {
+		if ((loadTask != null)
+				&& (loadTask.getStatus() == AsyncTask.Status.RUNNING)) {
+			return;
+		}
+		View header = this.findViewById(R.id.update_progress);
+		header.setVisibility(View.VISIBLE);
+		updateHomeTimeline();
+	}
+
+	public void hideHeader() {
+		View header = this.findViewById(R.id.update_progress);
+		header.setVisibility(View.GONE);
+	}
+
+	public void showFooter(long maxid) {
+		if ((loadTask != null)
+				&& (loadTask.getStatus() == AsyncTask.Status.RUNNING)) {
+			return;
+		}
+		View footer = this.findViewById(R.id.older_progress);
+		footer.setVisibility(View.VISIBLE);
+		/// TODO: show last item hidden by footer
+		getOlderHomeTimeline(maxid);
+	}
+	
+	public void hideFooter() {
+		View footer = this.findViewById(R.id.older_progress);
+		footer.setVisibility(View.GONE);
+	}
+	
+	private void updateHomeTimeline() {
+		loadTask = new AsyncTask<Void, Void, ResponseList<twitter4j.Status>>() {
+			@Override
+			protected ResponseList<twitter4j.Status> doInBackground(
+					Void... params) {
+				ResponseList<twitter4j.Status> home = null;
+				try {
+					if (0 != lastId) {
+						Paging p = new Paging();
+						p.setSinceId(lastId);
+						home = twitter.getHomeTimeline(p);
+					} else {
+						home = twitter.getHomeTimeline();
+					}
+				} catch (TwitterException e) {
+					e.printStackTrace();
+				}
+				return home;
 			}
-			ListView tweet_list = (ListView) this.findViewById(R.id.tweet_list);
-			tweet_list.setAdapter(adapter);
-		} catch (TwitterException e) {
-			e.printStackTrace();
+
+			protected void onPostExecute(ResponseList<twitter4j.Status> home) {
+				Log.v("twitter", "load complete");
+				if ((null != home) && (home.size() > 0)) {
+					for (int i = 0; i < home.size(); ++i) {
+						Log.v("twitter", home.get(i).getText());
+						adapter.insert(home.get(i), i);
+					}
+					lastId = home.get(0).getId();
+					if (home.size() > 20) {
+						// ŠÔ‚ª”²‚¯‚Ä‚¢‚é
+					}
+				}
+				hideHeader();
+			}
+
+		}.execute();
+	}
+
+	public void getOlderHomeTimeline(final long id) {
+		if (id <= 1) {
+			return;
 		}
 
+		loadTask = new AsyncTask<Void, Void, ResponseList<twitter4j.Status>>() {
+			@Override
+			protected ResponseList<twitter4j.Status> doInBackground(
+					Void... params) {
+				ResponseList<twitter4j.Status> home = null;
+				try {
+					Paging p = new Paging();
+					p.setMaxId(id - 1);
+					home = twitter.getHomeTimeline(p);
+				} catch (TwitterException e) {
+					e.printStackTrace();
+				}
+				return home;
+			}
+
+			protected void onPostExecute(ResponseList<twitter4j.Status> home) {
+				Log.v("twitter", "load complete");
+				if ((null != home) && (home.size() > 0)) {
+					for (int i = 0; i < home.size(); ++i) {
+						Log.v("twitter", home.get(i).getText());
+						adapter.add(home.get(i));
+					}
+				}
+				hideFooter();
+			}
+		}.execute();
 	}
 }

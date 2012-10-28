@@ -7,6 +7,8 @@ import java.net.URL;
 import java.util.HashMap;
 
 import android.graphics.drawable.Drawable;
+import android.os.AsyncTask;
+import android.widget.ImageView;
 import twitter4j.User;
 
 public class UserManager {
@@ -16,17 +18,28 @@ public class UserManager {
 		userMap = new HashMap<User, Drawable>();
 	}
 	
-	public Drawable getIcon(User user){
-		Drawable drawable;
-		drawable = userMap.get(user);
-		if(null==drawable){
-			URL url = user.getProfileImageUrlHttps();
-			drawable = loadImage(url);
-			if(null!=drawable){
-				userMap.put(user, drawable);
-			}
+	public void getIcon(User user, final ImageView view){
+		Drawable drawable = userMap.get(user);
+		if(null!=drawable){
+			view.setImageDrawable(drawable);
+			return;
 		}
-		return drawable;
+		
+		new AsyncTask<User, Void, Drawable>() {
+			@Override
+			protected Drawable doInBackground(User... params) {
+				User user = params[0];
+				URL url = user.getProfileImageUrlHttps();
+				Drawable d = loadImage(url);
+				if(null!=d){
+					userMap.put(user, d);
+				}
+				return d;
+			}
+			protected void onPostExecute(Drawable result) {
+				view.setImageDrawable(result);
+			}
+		}.execute(user);
 	}
 
 	private Drawable loadImage(URL url) {
