@@ -1,0 +1,16 @@
+Starlight - Twitter client for Android
+
+[Import]
+Eclipse > File > Import
+Select an import source: Git > Projects from Git
+Select Repository Source: URI
+Location:
+  URI: https://github.com/kimuchi1203/Starlight.git
+  Host: github.com
+  Repository path: /kimuchi1203/Starlight.git
+Connection:
+  Protocol: https
+
+Edit MainActivity.java
+  input CONSUMER_KEY and CONSUMER_SECRET
+
