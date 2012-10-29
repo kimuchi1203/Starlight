@@ -181,7 +181,7 @@ public class MainActivity extends Activity {
 					}
 					lastId = home.get(0).getId();
 					if (home.size() > 20) {
-						// ŠÔ‚ª”²‚¯‚Ä‚¢‚é
+						// get middle
 					}
 				}
 				hideHeader();
