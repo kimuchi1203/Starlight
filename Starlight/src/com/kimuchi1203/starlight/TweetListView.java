@@ -34,7 +34,6 @@ public class TweetListView extends ListView {
 	    if(-80==scrollY){
 	    	parent.showHeader();
 	    }else if(80==scrollY){
-	    	parent.hideHeader();//for debug
 	    	ListAdapter adapter = this.getAdapter();
 	    	int count = adapter.getCount();
 	    	if(count>0){

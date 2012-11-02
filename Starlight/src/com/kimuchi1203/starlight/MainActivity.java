@@ -34,8 +34,8 @@ public class MainActivity extends Activity {
 	private RequestToken requestToken;
 	private TweetListAdapter adapter;
 	private long lastId;
-	private AsyncTask<Void, Void, ResponseList<Status>> loadTask;
-
+	private AsyncTask<Paging, Void, ResponseList<Status>> loadTask;
+	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -59,7 +59,7 @@ public class MainActivity extends Activity {
 		});
 
 		if (loadToken()) {
-			updateHomeTimeline();
+			getHomeTimeline(null);
 		}
 	}
 
@@ -100,7 +100,7 @@ public class MainActivity extends Activity {
 				editor.putString(KEY_TOKEN_SECRET, accessToken.getTokenSecret());
 				editor.commit();
 
-				updateHomeTimeline();
+				getHomeTimeline(null);
 			} catch (TwitterException e) {
 				android.util.Log.e("TwitterException", e.toString());
 			}
@@ -128,7 +128,13 @@ public class MainActivity extends Activity {
 		}
 		View header = this.findViewById(R.id.update_progress);
 		header.setVisibility(View.VISIBLE);
-		updateHomeTimeline();
+		if(0!=lastId){
+			Paging p = new Paging();
+			p.setSinceId(lastId);
+			getHomeTimeline(p);
+		}else{
+			getHomeTimeline(null);
+		}
 	}
 
 	public void hideHeader() {
@@ -144,7 +150,9 @@ public class MainActivity extends Activity {
 		View footer = this.findViewById(R.id.older_progress);
 		footer.setVisibility(View.VISIBLE);
 		/// TODO: show last item hidden by footer
-		getOlderHomeTimeline(maxid);
+		Paging p = new Paging();
+		p.setMaxId(maxid);
+		getHomeTimeline(p);
 	}
 	
 	public void hideFooter() {
@@ -152,74 +160,63 @@ public class MainActivity extends Activity {
 		footer.setVisibility(View.GONE);
 	}
 	
-	private void updateHomeTimeline() {
-		loadTask = new AsyncTask<Void, Void, ResponseList<twitter4j.Status>>() {
-			@Override
-			protected ResponseList<twitter4j.Status> doInBackground(
-					Void... params) {
-				ResponseList<twitter4j.Status> home = null;
-				try {
-					if (0 != lastId) {
-						Paging p = new Paging();
-						p.setSinceId(lastId);
-						home = twitter.getHomeTimeline(p);
-					} else {
-						home = twitter.getHomeTimeline();
-					}
-				} catch (TwitterException e) {
-					e.printStackTrace();
-				}
-				return home;
-			}
-
+	private void getHomeTimeline(final Paging p) {
+		loadTask = new GetHomeTask(twitter){
 			protected void onPostExecute(ResponseList<twitter4j.Status> home) {
-				Log.v("twitter", "load complete");
-				if ((null != home) && (home.size() > 0)) {
-					for (int i = 0; i < home.size(); ++i) {
-						Log.v("twitter", home.get(i).getText());
-						adapter.insert(home.get(i), i);
-					}
-					lastId = home.get(0).getId();
-					if (home.size() > 20) {
-						// get middle
+				if((null!=home)&&(home.size()>0)){					
+					if(null!=p){
+						long sinceId = p.getSinceId();
+						long maxId = p.getMaxId();
+						Log.v("twitter", "getHomeTimeline since "+sinceId+" max "+maxId);
+						if((-1!=sinceId)&&(-1!=maxId)){
+							// [.. sinceId] <tailId ..home.. headId> [maxId+1 .. lastId]
+							int cnt;
+							for(cnt=0;cnt<adapter.getCount();++cnt){
+								twitter4j.Status st = adapter.getItem(cnt);
+								if(st.getId()<maxId+1){
+									break;
+								}
+							}
+							for(int i=0;i<home.size();++i){
+								adapter.insert(home.get(i), cnt+i);
+							}
+							// from sinceId to tailId
+							Paging p2 = new Paging();
+							p2.setSinceId(sinceId);
+							p2.setMaxId(home.get(home.size()-1).getId()-1);
+							getHomeTimeline(p2);
+						}else if(-1!=sinceId){
+							// [.. sinceId=lastId] <tailId ..home.. headId>
+							for (int i = 0; i < home.size(); ++i) {
+								adapter.insert(home.get(i), i);
+							}
+							// update lastId <-- headId
+							lastId = home.get(0).getId();
+							// from sinceId to tailId
+							Paging p2 = new Paging();
+							p2.setSinceId(sinceId);
+							p2.setMaxId(home.get(home.size()-1).getId()-1);
+							getHomeTimeline(p2);
+						}else{
+							// <tailId .. home.. headId> [maxId+1 .. lastId]
+							for (int i = 0; i < home.size(); ++i) {
+								//Log.v("twitter", home.get(i).getText());
+								adapter.add(home.get(i));
+							}
+						}
+					}else{
+						// <tailId .. home.. headId>
+						for (int i = 0; i < home.size(); ++i) {
+							adapter.add(home.get(i));
+						}
+						// update lastId <-- headId
+						lastId = home.get(0).getId();
 					}
 				}
 				hideHeader();
-			}
-
-		}.execute();
-	}
-
-	public void getOlderHomeTimeline(final long id) {
-		if (id <= 1) {
-			return;
-		}
-
-		loadTask = new AsyncTask<Void, Void, ResponseList<twitter4j.Status>>() {
-			@Override
-			protected ResponseList<twitter4j.Status> doInBackground(
-					Void... params) {
-				ResponseList<twitter4j.Status> home = null;
-				try {
-					Paging p = new Paging();
-					p.setMaxId(id - 1);
-					home = twitter.getHomeTimeline(p);
-				} catch (TwitterException e) {
-					e.printStackTrace();
-				}
-				return home;
-			}
-
-			protected void onPostExecute(ResponseList<twitter4j.Status> home) {
-				Log.v("twitter", "load complete");
-				if ((null != home) && (home.size() > 0)) {
-					for (int i = 0; i < home.size(); ++i) {
-						Log.v("twitter", home.get(i).getText());
-						adapter.add(home.get(i));
-					}
-				}
 				hideFooter();
+				return;
 			}
-		}.execute();
+		}.execute(p);
 	}
 }
