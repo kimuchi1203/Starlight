@@ -11,9 +11,11 @@ import twitter4j.auth.RequestToken;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.LoaderManager.LoaderCallbacks;
+import android.support.v4.content.Loader;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
@@ -22,10 +24,12 @@ import android.view.Window;
 import android.widget.Button;
 import android.widget.ListView;
 
-public class MainActivity extends Activity {
+public class MainActivity extends FragmentActivity {
+
 	private static final String CONSUMER_KEY = "";
 	private static final String CONSUMER_SECRET = "";
 	private static final String CALLBACK_URL = "callback://host";
+
 	private static final String OAUTH_VERIFIER = "oauth_verifier";
 	private static final String KEY_TOKEN = "token";
 	private static final String KEY_TOKEN_SECRET = "token_secret";
@@ -44,6 +48,11 @@ public class MainActivity extends Activity {
 		getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE,
 				R.layout.custom_title);
 
+		twitter = new TwitterFactory().getInstance();
+		twitter.setOAuthConsumer(CONSUMER_KEY, CONSUMER_SECRET);
+
+		
+		
 		lastId = 0;
 		loadTask = null;
 		adapter = new TweetListAdapter(this, R.layout.tweet_list);
@@ -70,40 +79,20 @@ public class MainActivity extends Activity {
 	}
 
 	private void doOAuth() {
-		try {
-			twitter = new TwitterFactory().getInstance();
-			twitter.setOAuthConsumer(CONSUMER_KEY, CONSUMER_SECRET);
-			requestToken = twitter.getOAuthRequestToken(CALLBACK_URL);
-			String url = requestToken.getAuthorizationURL();
-			this.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
-		} catch (TwitterException e) {
-			e.printStackTrace();
-		}
-
+		getSupportLoaderManager().initLoader(0, null, new TwitterRequestTokenLoaderCallbacks(this, twitter, CALLBACK_URL));
 	}
 
+	public void setRequestToken(RequestToken r) {
+		requestToken = r;
+	}
+	
 	@Override
 	protected void onNewIntent(Intent intent) {
 		super.onNewIntent(intent);
 		Uri uri = intent.getData();
 		if (uri != null && uri.toString().startsWith(CALLBACK_URL)) {
-			try {
-				String verifier = uri.getQueryParameter(OAUTH_VERIFIER);
-				AccessToken accessToken = twitter.getOAuthAccessToken(
-						requestToken, verifier);
-
-				// store to SharedPreferences
-				// (/data/data/com.kimuchi1203.starlight/shared_prefs)
-				SharedPreferences pref = getPreferences(MODE_PRIVATE);
-				SharedPreferences.Editor editor = pref.edit();
-				editor.putString(KEY_TOKEN, accessToken.getToken());
-				editor.putString(KEY_TOKEN_SECRET, accessToken.getTokenSecret());
-				editor.commit();
-
-				getHomeTimeline(null);
-			} catch (TwitterException e) {
-				android.util.Log.e("TwitterException", e.toString());
-			}
+			String verifier = uri.getQueryParameter(OAUTH_VERIFIER);
+			getSupportLoaderManager().initLoader(1, null, new TwitterAccessTokenLoaderCallbacks(this, twitter, requestToken, verifier));
 		}
 	}
 
@@ -160,7 +149,7 @@ public class MainActivity extends Activity {
 		footer.setVisibility(View.GONE);
 	}
 	
-	private void getHomeTimeline(final Paging p) {
+	public void getHomeTimeline(final Paging p) {
 		loadTask = new GetHomeTask(twitter){
 			protected void onPostExecute(ResponseList<twitter4j.Status> home) {
 				if((null!=home)&&(home.size()>0)){					
@@ -219,4 +208,5 @@ public class MainActivity extends Activity {
 			}
 		}.execute(p);
 	}
+
 }
