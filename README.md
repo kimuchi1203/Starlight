@@ -11,7 +11,6 @@ Starlight - Twitter client for Android
    * Repository path: /kimuchi1203/Starlight.git
 5. Connection:
    * Protocol: https
-
 6. Set CONSUMER_KEY and CONSUMER_SECRET
    * make src/com/kimuchi1203/starlight/ConsumerKey.java  
      (cf. src/com/kimuchi1203/starlight/template_ConsumerKey.java)
