@@ -13,6 +13,6 @@ Starlight - Twitter client for Android
    * Protocol: https
 
 6. Set CONSUMER_KEY and CONSUMER_SECRET
-   * make src/com/kimuchi1203/starlight/ConsumerKey.java
+   * make src/com/kimuchi1203/starlight/ConsumerKey.java  
      (cf. src/com/kimuchi1203/starlight/template_ConsumerKey.java)
 
