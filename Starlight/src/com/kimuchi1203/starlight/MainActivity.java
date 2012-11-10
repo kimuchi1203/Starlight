@@ -34,11 +34,15 @@ public class MainActivity extends FragmentActivity {
 	private static final String KEY_TOKEN = "token";
 	private static final String KEY_TOKEN_SECRET = "token_secret";
 
+	private static final int LOADER_ID_REQUEST_TOKEN = 0;
+	private static final int LOADER_ID_ACCESS_TOKEN = 1;
+	private static final int LOADER_ID_HOME_TIMELINE = 2;
+	
 	private Twitter twitter;
 	private RequestToken requestToken;
-	private TweetListAdapter adapter;
+	public TweetListAdapter adapter;
 	private long lastId;
-	private AsyncTask<Paging, Void, ResponseList<Status>> loadTask;
+	private boolean loadingFlag;
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -54,7 +58,7 @@ public class MainActivity extends FragmentActivity {
 		
 		
 		lastId = 0;
-		loadTask = null;
+		loadingFlag = false;
 		adapter = new TweetListAdapter(this, R.layout.tweet_list);
 		ListView tweet_list = (ListView) this.findViewById(R.id.tweet_list);
 		tweet_list.setAdapter(adapter);
@@ -79,7 +83,7 @@ public class MainActivity extends FragmentActivity {
 	}
 
 	private void doOAuth() {
-		getSupportLoaderManager().initLoader(0, null, new TwitterRequestTokenLoaderCallbacks(this, twitter, CALLBACK_URL));
+		getSupportLoaderManager().restartLoader(LOADER_ID_REQUEST_TOKEN, null, new TwitterRequestTokenLoaderCallbacks(this, twitter, CALLBACK_URL));
 	}
 
 	public void setRequestToken(RequestToken r) {
@@ -92,7 +96,7 @@ public class MainActivity extends FragmentActivity {
 		Uri uri = intent.getData();
 		if (uri != null && uri.toString().startsWith(CALLBACK_URL)) {
 			String verifier = uri.getQueryParameter(OAUTH_VERIFIER);
-			getSupportLoaderManager().initLoader(1, null, new TwitterAccessTokenLoaderCallbacks(this, twitter, requestToken, verifier));
+			getSupportLoaderManager().restartLoader(LOADER_ID_ACCESS_TOKEN, null, new TwitterAccessTokenLoaderCallbacks(this, twitter, requestToken, verifier));
 		}
 	}
 
@@ -111,8 +115,8 @@ public class MainActivity extends FragmentActivity {
 	}
 
 	public void showHeader() {
-		if ((loadTask != null)
-				&& (loadTask.getStatus() == AsyncTask.Status.RUNNING)) {
+		// if task running, return
+		if(loadingFlag){
 			return;
 		}
 		View header = this.findViewById(R.id.update_progress);
@@ -132,8 +136,8 @@ public class MainActivity extends FragmentActivity {
 	}
 
 	public void showFooter(long maxid) {
-		if ((loadTask != null)
-				&& (loadTask.getStatus() == AsyncTask.Status.RUNNING)) {
+		// if task running, return
+		if(loadingFlag){
 			return;
 		}
 		View footer = this.findViewById(R.id.older_progress);
@@ -150,63 +154,16 @@ public class MainActivity extends FragmentActivity {
 	}
 	
 	public void getHomeTimeline(final Paging p) {
-		loadTask = new GetHomeTask(twitter){
-			protected void onPostExecute(ResponseList<twitter4j.Status> home) {
-				if((null!=home)&&(home.size()>0)){					
-					if(null!=p){
-						long sinceId = p.getSinceId();
-						long maxId = p.getMaxId();
-						Log.v("twitter", "getHomeTimeline since "+sinceId+" max "+maxId);
-						if((-1!=sinceId)&&(-1!=maxId)){
-							// [.. sinceId] <tailId ..home.. headId> [maxId+1 .. lastId]
-							int cnt;
-							for(cnt=0;cnt<adapter.getCount();++cnt){
-								twitter4j.Status st = adapter.getItem(cnt);
-								if(st.getId()<maxId+1){
-									break;
-								}
-							}
-							for(int i=0;i<home.size();++i){
-								adapter.insert(home.get(i), cnt+i);
-							}
-							// from sinceId to tailId
-							Paging p2 = new Paging();
-							p2.setSinceId(sinceId);
-							p2.setMaxId(home.get(home.size()-1).getId()-1);
-							getHomeTimeline(p2);
-						}else if(-1!=sinceId){
-							// [.. sinceId=lastId] <tailId ..home.. headId>
-							for (int i = 0; i < home.size(); ++i) {
-								adapter.insert(home.get(i), i);
-							}
-							// update lastId <-- headId
-							lastId = home.get(0).getId();
-							// from sinceId to tailId
-							Paging p2 = new Paging();
-							p2.setSinceId(sinceId);
-							p2.setMaxId(home.get(home.size()-1).getId()-1);
-							getHomeTimeline(p2);
-						}else{
-							// <tailId .. home.. headId> [maxId+1 .. lastId]
-							for (int i = 0; i < home.size(); ++i) {
-								//Log.v("twitter", home.get(i).getText());
-								adapter.add(home.get(i));
-							}
-						}
-					}else{
-						// <tailId .. home.. headId>
-						for (int i = 0; i < home.size(); ++i) {
-							adapter.add(home.get(i));
-						}
-						// update lastId <-- headId
-						lastId = home.get(0).getId();
-					}
-				}
-				hideHeader();
-				hideFooter();
-				return;
-			}
-		}.execute(p);
+		setLoadingFlag(true);
+		getSupportLoaderManager().restartLoader(LOADER_ID_HOME_TIMELINE, null, new TwitterHomeTimelineLoaderCallbacks(this, twitter, p));
+	}
+
+	public void setLastId(long id) {
+		lastId = id;
+	}
+
+	public void setLoadingFlag(boolean b) {
+		loadingFlag = b;
 	}
 
 }
