@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.Loader;
 import android.util.Log;
+import android.widget.Toast;
 
 public class TwitterHomeTimelineLoaderCallbacks implements
 		LoaderCallbacks<ResponseList<twitter4j.Status>> {
@@ -95,8 +96,11 @@ public class TwitterHomeTimelineLoaderCallbacks implements
 
 	@Override
 	public void onLoaderReset(Loader<ResponseList<twitter4j.Status>> arg0) {
-		// TODO Auto-generated method stub
-
+		parent.adapter.notifyDataSetChanged();
+		parent.hideHeader();
+		parent.hideFooter();
+		parent.setLoadingFlag(false);
+		Toast.makeText(parent, "stop loading", Toast.LENGTH_LONG).show();
 	}
 
 }
