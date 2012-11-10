@@ -9,8 +9,9 @@ import android.support.v4.content.AsyncTaskLoader;
 public class TwitterRequestTokenLoader extends AsyncTaskLoader<RequestToken> {
 	private Twitter twitter;
 	private String callbackUrl;
-	
-	public TwitterRequestTokenLoader(Context context, Twitter twitter2, String callbackUrl2) {
+
+	public TwitterRequestTokenLoader(Context context, Twitter twitter2,
+			String callbackUrl2) {
 		super(context);
 		twitter = twitter2;
 		callbackUrl = callbackUrl2;

@@ -45,7 +45,8 @@ public class TwitterAccessTokenLoaderCallbacks implements
 		editor.putString(KEY_TOKEN, accessToken.getToken());
 		editor.putString(KEY_TOKEN_SECRET, accessToken.getTokenSecret());
 		editor.commit();
-
+		
+		parent.adapter.clear();
 		parent.getHomeTimeline(null);
 	}
 
