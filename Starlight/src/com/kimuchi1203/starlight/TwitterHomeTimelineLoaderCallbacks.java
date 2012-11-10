@@ -14,17 +14,19 @@ public class TwitterHomeTimelineLoaderCallbacks implements
 	private MainActivity parent;
 	private Twitter twitter;
 	private Paging paging;
+	private UserManager userManager;
 	
 	public TwitterHomeTimelineLoaderCallbacks(MainActivity mainActivity,
-			Twitter twitter2, Paging p) {
+			Twitter twitter2, UserManager userManager2) {
 		parent = mainActivity;
 		twitter = twitter2;
-		paging = p;
+		userManager = userManager2;
 	}
 
 	@Override
 	public Loader<ResponseList<twitter4j.Status>> onCreateLoader(int arg0,
 			Bundle arg1) {
+		paging = (Paging) arg1.getSerializable("paging");
 		TwitterHomeTimelineLoader loader = new TwitterHomeTimelineLoader(parent, twitter, paging);
 		loader.forceLoad();
 		return loader;
@@ -34,7 +36,8 @@ public class TwitterHomeTimelineLoaderCallbacks implements
 	public void onLoadFinished(Loader<ResponseList<twitter4j.Status>> arg0,
 			ResponseList<twitter4j.Status> arg1) {
 		ResponseList<twitter4j.Status> home = arg1; 
-		if((null!=home)&&(home.size()>0)){					
+		if((null!=home)&&(home.size()>0)){
+			userManager.loadIcon(home);
 			if(null!=paging){
 				long sinceId = paging.getSinceId();
 				long maxId = paging.getMaxId();
@@ -84,6 +87,7 @@ public class TwitterHomeTimelineLoaderCallbacks implements
 				parent.setLastId(home.get(0).getId());
 			}
 		}
+		parent.adapter.notifyDataSetChanged();
 		parent.hideHeader();
 		parent.hideFooter();
 		parent.setLoadingFlag(false);

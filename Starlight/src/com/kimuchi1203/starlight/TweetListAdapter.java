@@ -26,11 +26,10 @@ public class TweetListAdapter extends ArrayAdapter<Status> {
 		this.resourceId = resourceId;
 		inflater = (LayoutInflater) getContext()
 				.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-		userManager = new UserManager();
+		
 	}
 
 	public View getView(int position, View convertView, ViewGroup parent) {
-		final Status status = getItem(position);
 		ViewHolder holder;
 		if (convertView == null) {
 			convertView = inflater.inflate(resourceId, null);
@@ -43,10 +42,19 @@ public class TweetListAdapter extends ArrayAdapter<Status> {
 		}else{
 			holder = (ViewHolder)convertView.getTag();
 		}
-		User user = status.getUser();
-		userManager.getIcon(user, holder.icon);
-		holder.text.setText(status.getText());
-
+		final Status status = getItem(position);
+		if(status instanceof VirtualStatus){
+			holder.icon.setImageDrawable(null);
+			holder.text.setText("...now loading...");
+		}else{
+			User user = status.getUser();
+			userManager.getIcon(user, holder.icon);
+			holder.text.setText(status.getText());
+		}
 		return convertView;
+	}
+
+	public void setUserManager(UserManager userManager2) {
+		userManager = userManager2;
 	}
 }

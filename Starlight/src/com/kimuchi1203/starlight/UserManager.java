@@ -1,60 +1,74 @@
 package com.kimuchi1203.starlight;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 
 import android.graphics.drawable.Drawable;
-import android.os.AsyncTask;
+import android.os.Bundle;
+import android.support.v4.app.LoaderManager.LoaderCallbacks;
+import android.support.v4.content.Loader;
+import android.util.Log;
 import android.widget.ImageView;
+import twitter4j.ResponseList;
+import twitter4j.Status;
 import twitter4j.User;
 
-public class UserManager {
-	HashMap<User, Drawable> userMap;
+public class UserManager implements LoaderCallbacks<Map<User, Drawable>>{
+	private HashMap<User, Drawable> userMap;
+	private MainActivity parent;
+	ArrayList<User> userQueue;
 	
-	public UserManager(){
+	public UserManager(MainActivity mainActivity, TweetListAdapter tweetListAdapter){
 		userMap = new HashMap<User, Drawable>();
+		parent = mainActivity;
+		userQueue = new ArrayList<User>();
 	}
 	
 	public void getIcon(User user, final ImageView view){
 		Drawable drawable = userMap.get(user);
-		if(null!=drawable){
-			view.setImageDrawable(drawable);
-			return;
+		view.setImageDrawable(drawable);
+}
+
+	public void loadIcon(ResponseList<Status> home) {
+		for(Status st : home){
+			User u = st.getUser();
+			if((null==userMap.get(u))&&(userQueue.indexOf(u)==-1)){
+				userQueue.add(u);
+			}
 		}
-		
-		new AsyncTask<User, Void, Drawable>() {
-			@Override
-			protected Drawable doInBackground(User... params) {
-				User user = params[0];
-				URL url = user.getProfileImageUrlHttps();
-				Drawable d = loadImage(url);
-				if(null!=d){
-					userMap.put(user, d);
-				}
-				return d;
-			}
-			protected void onPostExecute(Drawable result) {
-				view.setImageDrawable(result);
-			}
-		}.execute(user);
+		for(User u : userQueue){
+			Bundle arg = new Bundle();
+			arg.putSerializable("user", u);
+			parent.getSupportLoaderManager().restartLoader(MainActivity.LOADER_ID_LOAD_ICON + u.hashCode(), arg, this);
+		}
+
 	}
 
-	private Drawable loadImage(URL url) {
-		Drawable d = null;
-		try {
-			HttpURLConnection http = (HttpURLConnection)url.openConnection();
-			http.setRequestMethod("GET");
-			http.connect();
-			InputStream in = http.getInputStream();
-			d = Drawable.createFromStream(in, "a");
-			in.close();
-		} catch (IOException e) {
-			e.printStackTrace();
+	@Override
+	public Loader<Map<User, Drawable>> onCreateLoader(int arg0, Bundle arg1) {
+		User u = (User) arg1.getSerializable("user");
+		HttpDrawableLoader loader = new HttpDrawableLoader(parent, u);
+		loader.forceLoad();
+		Log.v("UserManager", "load Icon "+u.getScreenName());
+		return loader;
+	}
+
+	@Override
+	public void onLoadFinished(Loader<Map<User, Drawable>> arg0, Map<User, Drawable> arg1) {
+		for(User u : arg1.keySet()){
+			Log.v("UserManager", "got Icon "+u.getScreenName());
+			userQueue.remove(u);
 		}
+		userMap.putAll(arg1);
+		if(userQueue.size()==0){
+			parent.adapter.notifyDataSetChanged();
+		}
+	}
+
+	@Override
+	public void onLoaderReset(Loader<Map<User, Drawable>> arg0) {
+		// TODO Auto-generated method stub
 		
-		return d;
 	}
 }

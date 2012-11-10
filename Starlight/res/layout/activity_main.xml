@@ -4,34 +4,9 @@
     android:layout_height="match_parent"
     android:id="@+id/main_layout" >
 
-	<RelativeLayout 
-        android:id="@+id/header"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true">
-        <ProgressBar android:id="@+id/update_progress"
-        	android:layout_width="wrap_content"
-        	android:layout_height="wrap_content"
-	        android:visibility="gone"
-        	android:layout_centerHorizontal="true" />
-	</RelativeLayout>
-    
 	<com.kimuchi1203.starlight.TweetListView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/tweet_list"
-        android:layout_below="@+id/header"
-        android:layout_above="@+id/footer" />
+        android:id="@+id/tweet_list" />
 	
-	<RelativeLayout 
-        android:id="@+id/footer"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true">
-        <ProgressBar android:id="@+id/older_progress"
-        	android:layout_width="wrap_content"
-        	android:layout_height="wrap_content"
-	        android:visibility="gone"
-        	android:layout_centerHorizontal="true" />
-	</RelativeLayout>
  </RelativeLayout>
