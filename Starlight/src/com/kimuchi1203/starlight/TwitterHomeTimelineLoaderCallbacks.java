@@ -6,20 +6,20 @@ import twitter4j.Twitter;
 import android.os.Bundle;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.Loader;
-import android.util.Log;
 import android.widget.Toast;
 
 public class TwitterHomeTimelineLoaderCallbacks implements
 		LoaderCallbacks<ResponseList<twitter4j.Status>> {
 
-	private MainActivity parent;
+	private HomeTimelineFragment parent;
 	private Twitter twitter;
 	private Paging paging;
 	private UserManager userManager;
-	
-	public TwitterHomeTimelineLoaderCallbacks(MainActivity mainActivity,
-			Twitter twitter2, UserManager userManager2) {
-		parent = mainActivity;
+
+	public TwitterHomeTimelineLoaderCallbacks(
+			HomeTimelineFragment homeTimelineFragment, Twitter twitter2,
+			UserManager userManager2) {
+		parent = homeTimelineFragment;
 		twitter = twitter2;
 		userManager = userManager2;
 	}
@@ -28,7 +28,8 @@ public class TwitterHomeTimelineLoaderCallbacks implements
 	public Loader<ResponseList<twitter4j.Status>> onCreateLoader(int arg0,
 			Bundle arg1) {
 		paging = (Paging) arg1.getSerializable("paging");
-		TwitterHomeTimelineLoader loader = new TwitterHomeTimelineLoader(parent, twitter, paging);
+		TwitterHomeTimelineLoader loader = new TwitterHomeTimelineLoader(
+				parent.getActivity(), twitter, paging);
 		loader.forceLoad();
 		return loader;
 	}
@@ -36,71 +37,73 @@ public class TwitterHomeTimelineLoaderCallbacks implements
 	@Override
 	public void onLoadFinished(Loader<ResponseList<twitter4j.Status>> arg0,
 			ResponseList<twitter4j.Status> arg1) {
-		ResponseList<twitter4j.Status> home = arg1; 
-		if((null!=home)&&(home.size()>0)){
+		ResponseList<twitter4j.Status> home = arg1;
+		if ((null != home) && (home.size() > 0)) {
 			userManager.loadIcon(home);
-			if(null!=paging){
+			if (null != paging) {
 				long sinceId = paging.getSinceId();
 				long maxId = paging.getMaxId();
-				Log.v("twitter", "getHomeTimeline since "+sinceId+" max "+maxId);
-				if((-1!=sinceId)&&(-1!=maxId)){
+				if ((-1 != sinceId) && (-1 != maxId)) {
 					// [.. sinceId] <tailId ..home.. headId> [maxId+1 .. lastId]
 					int cnt;
-					for(cnt=0;cnt<parent.adapter.getCount();++cnt){
+					for (cnt = 0; cnt < parent.adapter.getCount(); ++cnt) {
 						twitter4j.Status st = parent.adapter.getItem(cnt);
-						if(st.getId()<maxId+1){
+						if (st.getId() < maxId + 1) {
 							break;
 						}
 					}
-					for(int i=0;i<home.size();++i){
-						parent.adapter.insert(home.get(i), cnt+i);
+					for (int i = 0; i < home.size(); ++i) {
+						parent.adapter.insert(home.get(i), cnt + i);
 					}
 					// from sinceId to tailId
 					Paging p2 = new Paging();
 					p2.setSinceId(sinceId);
-					p2.setMaxId(home.get(home.size()-1).getId()-1);
+					p2.setMaxId(home.get(home.size() - 1).getId() - 1);
 					parent.getHomeTimeline(p2);
-				}else if(-1!=sinceId){
+				} else if (-1 != sinceId) {
 					// [.. sinceId=lastId] <tailId ..home.. headId>
 					for (int i = 0; i < home.size(); ++i) {
 						parent.adapter.insert(home.get(i), i);
 					}
 					// update lastId <-- headId
-					parent.setLastId(home.get(0).getId());
+					parent.lastId = home.get(0).getId();
 					// from sinceId to tailId
 					Paging p2 = new Paging();
 					p2.setSinceId(sinceId);
-					p2.setMaxId(home.get(home.size()-1).getId()-1);
+					p2.setMaxId(home.get(home.size() - 1).getId() - 1);
 					parent.getHomeTimeline(p2);
-				}else{
+				} else {
 					// <tailId .. home.. headId> [maxId+1 .. lastId]
 					for (int i = 0; i < home.size(); ++i) {
-						//Log.v("twitter", home.get(i).getText());
+						// Log.v("twitter", home.get(i).getText());
 						parent.adapter.add(home.get(i));
 					}
 				}
-			}else{
+			} else {
 				// <tailId .. home.. headId>
 				for (int i = 0; i < home.size(); ++i) {
 					parent.adapter.add(home.get(i));
 				}
 				// update lastId <-- headId
-				parent.setLastId(home.get(0).getId());
+				parent.lastId = home.get(0).getId();
 			}
 		}
 		parent.adapter.notifyDataSetChanged();
 		parent.hideHeader();
 		parent.hideFooter();
-		parent.setLoadingFlag(false);
+		parent.loadingFlag = false;
 	}
 
 	@Override
 	public void onLoaderReset(Loader<ResponseList<twitter4j.Status>> arg0) {
+		if (null == parent.getActivity())
+			return;
 		parent.adapter.notifyDataSetChanged();
 		parent.hideHeader();
 		parent.hideFooter();
-		parent.setLoadingFlag(false);
-		Toast.makeText(parent, "stop loading", Toast.LENGTH_LONG).show();
+		parent.loadingFlag = false;
+		Toast.makeText(parent.getActivity(), "stop loading", Toast.LENGTH_LONG)
+				.show();
 	}
 
 }

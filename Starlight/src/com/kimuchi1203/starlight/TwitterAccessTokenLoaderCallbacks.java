@@ -11,7 +11,7 @@ import android.support.v4.content.Loader;
 
 public class TwitterAccessTokenLoaderCallbacks implements
 		LoaderCallbacks<AccessToken> {
-	
+
 	private static final String KEY_TOKEN = "token";
 	private static final String KEY_TOKEN_SECRET = "token_secret";
 
@@ -30,7 +30,8 @@ public class TwitterAccessTokenLoaderCallbacks implements
 
 	@Override
 	public Loader<AccessToken> onCreateLoader(int arg0, Bundle arg1) {
-		TwitterAccessTokenLoader loader = new TwitterAccessTokenLoader(parent, twitter, requestToken, verifier);
+		TwitterAccessTokenLoader loader = new TwitterAccessTokenLoader(parent,
+				twitter, requestToken, verifier);
 		loader.forceLoad();
 		return loader;
 	}
@@ -45,9 +46,9 @@ public class TwitterAccessTokenLoaderCallbacks implements
 		editor.putString(KEY_TOKEN, accessToken.getToken());
 		editor.putString(KEY_TOKEN_SECRET, accessToken.getTokenSecret());
 		editor.commit();
-		
-		parent.adapter.clear();
-		parent.getHomeTimeline(null);
+
+		parent.getCurrentFragment().resetHomeTimeline();
+		parent.getCurrentFragment().getHomeTimeline(null);
 	}
 
 	@Override

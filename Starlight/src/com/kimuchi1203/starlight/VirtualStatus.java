@@ -22,10 +22,10 @@ public class VirtualStatus implements Status {
 	private static final long serialVersionUID = 6074266652099296080L;
 	private int id;
 
-	public VirtualStatus(int id2){
+	public VirtualStatus(int id2) {
 		id = id2;
 	}
-	
+
 	@Override
 	public int compareTo(Status arg0) {
 		// TODO Auto-generated method stub

@@ -16,7 +16,7 @@ import android.support.v4.content.AsyncTaskLoader;
 public class HttpDrawableLoader extends AsyncTaskLoader<Map<User, Drawable>> {
 
 	private User user;
-	
+
 	public HttpDrawableLoader(Context context, User u) {
 		super(context);
 		user = u;
@@ -30,11 +30,11 @@ public class HttpDrawableLoader extends AsyncTaskLoader<Map<User, Drawable>> {
 		m.put(user, d);
 		return m;
 	}
-	
+
 	private Drawable loadImage(URL url) {
 		Drawable d = null;
 		try {
-			HttpURLConnection http = (HttpURLConnection)url.openConnection();
+			HttpURLConnection http = (HttpURLConnection) url.openConnection();
 			http.setRequestMethod("GET");
 			http.connect();
 			InputStream in = http.getInputStream();
@@ -43,7 +43,7 @@ public class HttpDrawableLoader extends AsyncTaskLoader<Map<User, Drawable>> {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		
+
 		return d;
 	}
 }

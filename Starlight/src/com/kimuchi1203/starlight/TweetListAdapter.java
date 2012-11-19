@@ -15,18 +15,18 @@ public class TweetListAdapter extends ArrayAdapter<Status> {
 	private UserManager userManager;
 	private LayoutInflater inflater;
 
-	static class ViewHolder {  
-	    TextView screenName;  
-	    TextView text;  
-	    ImageView icon;  
-	}  
-	
+	static class ViewHolder {
+		TextView screenName;
+		TextView text;
+		ImageView icon;
+	}
+
 	public TweetListAdapter(Context context, int resourceId) {
 		super(context, resourceId);
 		this.resourceId = resourceId;
-		inflater = (LayoutInflater) getContext()
-				.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-		
+		inflater = (LayoutInflater) getContext().getSystemService(
+				Context.LAYOUT_INFLATER_SERVICE);
+
 	}
 
 	public View getView(int position, View convertView, ViewGroup parent) {
@@ -39,14 +39,14 @@ public class TweetListAdapter extends ArrayAdapter<Status> {
 			holder.text = text;
 			holder.icon = icon;
 			convertView.setTag(holder);
-		}else{
-			holder = (ViewHolder)convertView.getTag();
+		} else {
+			holder = (ViewHolder) convertView.getTag();
 		}
 		final Status status = getItem(position);
-		if(status instanceof VirtualStatus){
+		if (status instanceof VirtualStatus) {
 			holder.icon.setImageDrawable(null);
 			holder.text.setText("...now loading...");
-		}else{
+		} else {
 			User user = status.getUser();
 			userManager.getIcon(user, holder.icon);
 			holder.text.setText(status.getText());

@@ -8,13 +8,15 @@ import android.os.Bundle;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.Loader;
 
-public class TwitterRequestTokenLoaderCallbacks implements LoaderCallbacks<RequestToken> {
+public class TwitterRequestTokenLoaderCallbacks implements
+		LoaderCallbacks<RequestToken> {
 
 	private MainActivity parent;
 	private Twitter twitter;
 	private String callbackUrl;
 
-	public TwitterRequestTokenLoaderCallbacks(MainActivity mainActivity, Twitter twitter2, String callbackUrl2) {
+	public TwitterRequestTokenLoaderCallbacks(MainActivity mainActivity,
+			Twitter twitter2, String callbackUrl2) {
 		parent = mainActivity;
 		twitter = twitter2;
 		callbackUrl = callbackUrl2;
@@ -22,7 +24,8 @@ public class TwitterRequestTokenLoaderCallbacks implements LoaderCallbacks<Reque
 
 	@Override
 	public Loader<RequestToken> onCreateLoader(int arg0, Bundle arg1) {
-		TwitterRequestTokenLoader loader = new TwitterRequestTokenLoader(parent, twitter, callbackUrl);
+		TwitterRequestTokenLoader loader = new TwitterRequestTokenLoader(
+				parent, twitter, callbackUrl);
 		loader.forceLoad();
 		return loader;
 	}
@@ -38,7 +41,7 @@ public class TwitterRequestTokenLoaderCallbacks implements LoaderCallbacks<Reque
 	@Override
 	public void onLoaderReset(Loader<RequestToken> arg0) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 }

@@ -8,11 +8,13 @@ import twitter4j.TwitterException;
 import android.content.Context;
 import android.support.v4.content.AsyncTaskLoader;
 
-public class TwitterHomeTimelineLoader extends AsyncTaskLoader<ResponseList<twitter4j.Status>> {
+public class TwitterHomeTimelineLoader extends
+		AsyncTaskLoader<ResponseList<twitter4j.Status>> {
 	Twitter twitter;
 	Paging paging;
-	
-	public TwitterHomeTimelineLoader(Context context, Twitter twitter2, Paging paging2) {
+
+	public TwitterHomeTimelineLoader(Context context, Twitter twitter2,
+			Paging paging2) {
 		super(context);
 		twitter = twitter2;
 		paging = paging2;
@@ -22,7 +24,7 @@ public class TwitterHomeTimelineLoader extends AsyncTaskLoader<ResponseList<twit
 	public ResponseList<Status> loadInBackground() {
 		ResponseList<twitter4j.Status> home = null;
 		try {
-			if(null!=paging){
+			if (null != paging) {
 				home = twitter.getHomeTimeline(paging);
 			} else {
 				home = twitter.getHomeTimeline();
@@ -32,7 +34,7 @@ public class TwitterHomeTimelineLoader extends AsyncTaskLoader<ResponseList<twit
 		}
 		return home;
 	}
-	
+
 	public Paging getPaging() {
 		return paging;
 	}

@@ -11,8 +11,9 @@ public class TwitterAccessTokenLoader extends AsyncTaskLoader<AccessToken> {
 	private Twitter twitter;
 	private RequestToken requestToken;
 	private String verifier;
-	
-	public TwitterAccessTokenLoader(Context context, Twitter twitter2, RequestToken requestToken2, String verifier2) {
+
+	public TwitterAccessTokenLoader(Context context, Twitter twitter2,
+			RequestToken requestToken2, String verifier2) {
 		super(context);
 		twitter = twitter2;
 		requestToken = requestToken2;
@@ -23,8 +24,7 @@ public class TwitterAccessTokenLoader extends AsyncTaskLoader<AccessToken> {
 	public AccessToken loadInBackground() {
 		AccessToken accessToken = null;
 		try {
-			accessToken = twitter.getOAuthAccessToken(
-					requestToken, verifier);
+			accessToken = twitter.getOAuthAccessToken(requestToken, verifier);
 		} catch (TwitterException e) {
 			e.printStackTrace();
 		}
