@@ -1,27 +1,32 @@
 package com.kimuchi1203.starlight;
 
+import java.util.ArrayList;
+
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 
 public class MainFragmentPagerAdapter extends FragmentStatePagerAdapter {
+	ArrayList<Fragment> fragmentList;
 
 	public MainFragmentPagerAdapter(FragmentManager fm) {
 		super(fm);
+		fragmentList = new ArrayList<Fragment>();
+		fragmentList.add(new HomeTimelineFragment());
+		fragmentList.add(new MentionFragment());
 	}
 
 	@Override
 	public Fragment getItem(int position) {
 		Fragment fragment = null;
-		if (0 == position) {
-			fragment = new HomeTimelineFragment();
+		if (position < fragmentList.size()) {
+			fragment = fragmentList.get(position);
 		}
 		return fragment;
 	}
 
 	@Override
 	public int getCount() {
-		return 1;
+		return fragmentList.size();
 	}
-
 }

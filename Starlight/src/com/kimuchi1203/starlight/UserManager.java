@@ -8,6 +8,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.Loader;
+import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import twitter4j.ResponseList;
 import twitter4j.Status;
@@ -16,12 +17,14 @@ import twitter4j.User;
 public class UserManager implements LoaderCallbacks<Map<User, Drawable>> {
 	private HashMap<User, Drawable> userMap;
 	private MainActivity parent;
-	ArrayList<User> userQueue;
+	private ArrayList<User> userQueue;
+	public ArrayList<ArrayAdapter<Status>> adapterList;
 
 	public UserManager(MainActivity mainActivity) {
 		userMap = new HashMap<User, Drawable>();
 		parent = mainActivity;
 		userQueue = new ArrayList<User>();
+		adapterList = new ArrayList<ArrayAdapter<Status>>();
 	}
 
 	public void getIcon(User user, final ImageView view) {
@@ -61,7 +64,10 @@ public class UserManager implements LoaderCallbacks<Map<User, Drawable>> {
 		}
 		userMap.putAll(arg1);
 		if (userQueue.size() == 0) {
-			parent.getCurrentAdapter().notifyDataSetChanged();
+			// notifyDataSetChanged in all fragment.listadapter
+			for (ArrayAdapter<Status> adapter : adapterList) {
+				adapter.notifyDataSetChanged();
+			}
 		}
 	}
 

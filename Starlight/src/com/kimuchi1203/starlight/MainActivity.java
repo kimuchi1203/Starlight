@@ -111,16 +111,15 @@ public class MainActivity extends FragmentActivity {
 		}
 	}
 
-	public TweetListAdapter getCurrentAdapter() {
-		return getCurrentFragment().getAdapter();
-	}
-
 	public HomeTimelineFragment getCurrentFragment() {
 		ViewPager pager = (ViewPager) findViewById(R.id.pager);
 		FragmentStatePagerAdapter sAdapter = (FragmentStatePagerAdapter) pager
 				.getAdapter();
-		HomeTimelineFragment f2 = (HomeTimelineFragment) sAdapter
-				.instantiateItem(pager, pager.getCurrentItem());
-		return f2;
+		Object f1 = sAdapter.instantiateItem(pager, pager.getCurrentItem());
+		if (f1 instanceof HomeTimelineFragment) {
+			return (HomeTimelineFragment) f1;
+		} else {
+			return null;
+		}
 	}
 }

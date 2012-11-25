@@ -22,6 +22,9 @@ public class TwitterHomeTimelineLoaderCallbacks implements
 		parent = homeTimelineFragment;
 		twitter = twitter2;
 		userManager = userManager2;
+		if (!userManager.adapterList.contains(parent.adapter)) {
+			userManager.adapterList.add(parent.adapter);
+		}
 	}
 
 	@Override
