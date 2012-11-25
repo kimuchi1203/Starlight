@@ -1,7 +1,9 @@
 package com.kimuchi1203.starlight;
 
-import android.support.v4.app.Fragment;
+public class MentionFragment extends TweetViewFragment {
 
-public class MentionFragment extends Fragment {
-
+	@Override
+	protected void setId() {
+		id = MainActivity.LOADER_ID_MENTION;
+	}
 }

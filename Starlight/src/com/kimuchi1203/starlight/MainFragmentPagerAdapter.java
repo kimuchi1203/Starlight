@@ -7,11 +7,11 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 
 public class MainFragmentPagerAdapter extends FragmentStatePagerAdapter {
-	ArrayList<Fragment> fragmentList;
+	public ArrayList<TweetViewFragment> fragmentList;
 
 	public MainFragmentPagerAdapter(FragmentManager fm) {
 		super(fm);
-		fragmentList = new ArrayList<Fragment>();
+		fragmentList = new ArrayList<TweetViewFragment>();
 		fragmentList.add(new HomeTimelineFragment());
 		fragmentList.add(new MentionFragment());
 	}

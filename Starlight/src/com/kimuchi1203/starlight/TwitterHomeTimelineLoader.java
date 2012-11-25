@@ -5,37 +5,54 @@ import twitter4j.ResponseList;
 import twitter4j.Status;
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
+import twitter4j.TwitterFactory;
 import android.content.Context;
 import android.support.v4.content.AsyncTaskLoader;
 
 public class TwitterHomeTimelineLoader extends
 		AsyncTaskLoader<ResponseList<twitter4j.Status>> {
-	Twitter twitter;
-	Paging paging;
+	private Paging paging;
+	private int id;
 
-	public TwitterHomeTimelineLoader(Context context, Twitter twitter2,
-			Paging paging2) {
+	public TwitterHomeTimelineLoader(Context context, Paging paging2, int id2) {
 		super(context);
-		twitter = twitter2;
 		paging = paging2;
+		id = id2;
 	}
 
 	@Override
 	public ResponseList<Status> loadInBackground() {
 		ResponseList<twitter4j.Status> home = null;
-		try {
+		Twitter twitter = TwitterFactory.getSingleton();
+		if (MainActivity.LOADER_ID_HOME_TIMELINE == id) {
 			if (null != paging) {
-				home = twitter.getHomeTimeline(paging);
+				try {
+					home = twitter.getHomeTimeline(paging);
+				} catch (TwitterException e) {
+					e.printStackTrace();
+				}
 			} else {
-				home = twitter.getHomeTimeline();
+				try {
+					home = twitter.getHomeTimeline();
+				} catch (TwitterException e) {
+					e.printStackTrace();
+				}
 			}
-		} catch (TwitterException e) {
-			e.printStackTrace();
+		} else if (MainActivity.LOADER_ID_MENTION == id) {
+			if (null != paging) {
+				try {
+					home = twitter.getMentions(paging);
+				} catch (TwitterException e) {
+					e.printStackTrace();
+				}
+			} else {
+				try {
+					home = twitter.getMentions();
+				} catch (TwitterException e) {
+					e.printStackTrace();
+				}
+			}
 		}
 		return home;
-	}
-
-	public Paging getPaging() {
-		return paging;
 	}
 }

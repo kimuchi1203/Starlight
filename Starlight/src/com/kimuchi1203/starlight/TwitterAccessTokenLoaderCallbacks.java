@@ -1,6 +1,5 @@
 package com.kimuchi1203.starlight;
 
-import twitter4j.Twitter;
 import twitter4j.auth.AccessToken;
 import twitter4j.auth.RequestToken;
 import android.content.Context;
@@ -16,14 +15,12 @@ public class TwitterAccessTokenLoaderCallbacks implements
 	private static final String KEY_TOKEN_SECRET = "token_secret";
 
 	private MainActivity parent;
-	private Twitter twitter;
 	private RequestToken requestToken;
 	private String verifier;
 
 	public TwitterAccessTokenLoaderCallbacks(MainActivity mainActivity,
-			Twitter twitter2, RequestToken requestToken2, String verifier2) {
+			RequestToken requestToken2, String verifier2) {
 		parent = mainActivity;
-		twitter = twitter2;
 		requestToken = requestToken2;
 		verifier = verifier2;
 	}
@@ -31,7 +28,7 @@ public class TwitterAccessTokenLoaderCallbacks implements
 	@Override
 	public Loader<AccessToken> onCreateLoader(int arg0, Bundle arg1) {
 		TwitterAccessTokenLoader loader = new TwitterAccessTokenLoader(parent,
-				twitter, requestToken, verifier);
+				requestToken, verifier);
 		loader.forceLoad();
 		return loader;
 	}
@@ -47,8 +44,13 @@ public class TwitterAccessTokenLoaderCallbacks implements
 		editor.putString(KEY_TOKEN_SECRET, accessToken.getTokenSecret());
 		editor.commit();
 
-		parent.getCurrentFragment().resetHomeTimeline();
-		parent.getCurrentFragment().getHomeTimeline(null);
+		// reset all fragment.listview.adapter
+		MainFragmentPagerAdapter adapter = (MainFragmentPagerAdapter) parent.pager
+				.getAdapter();
+		for (TweetViewFragment f : adapter.fragmentList) {
+			f.resetTweets();
+			f.getTweets(null);
+		}
 	}
 
 	@Override

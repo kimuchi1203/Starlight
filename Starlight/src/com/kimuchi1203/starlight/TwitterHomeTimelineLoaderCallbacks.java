@@ -2,7 +2,6 @@ package com.kimuchi1203.starlight;
 
 import twitter4j.Paging;
 import twitter4j.ResponseList;
-import twitter4j.Twitter;
 import android.os.Bundle;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.Loader;
@@ -11,16 +10,13 @@ import android.widget.Toast;
 public class TwitterHomeTimelineLoaderCallbacks implements
 		LoaderCallbacks<ResponseList<twitter4j.Status>> {
 
-	private HomeTimelineFragment parent;
-	private Twitter twitter;
+	private TweetViewFragment parent;
 	private Paging paging;
 	private UserManager userManager;
 
 	public TwitterHomeTimelineLoaderCallbacks(
-			HomeTimelineFragment homeTimelineFragment, Twitter twitter2,
-			UserManager userManager2) {
+			TweetViewFragment homeTimelineFragment, UserManager userManager2) {
 		parent = homeTimelineFragment;
-		twitter = twitter2;
 		userManager = userManager2;
 		if (!userManager.adapterList.contains(parent.adapter)) {
 			userManager.adapterList.add(parent.adapter);
@@ -32,7 +28,7 @@ public class TwitterHomeTimelineLoaderCallbacks implements
 			Bundle arg1) {
 		paging = (Paging) arg1.getSerializable("paging");
 		TwitterHomeTimelineLoader loader = new TwitterHomeTimelineLoader(
-				parent.getActivity(), twitter, paging);
+				parent.getActivity(), paging, arg0);
 		loader.forceLoad();
 		return loader;
 	}
@@ -62,7 +58,7 @@ public class TwitterHomeTimelineLoaderCallbacks implements
 					Paging p2 = new Paging();
 					p2.setSinceId(sinceId);
 					p2.setMaxId(home.get(home.size() - 1).getId() - 1);
-					parent.getHomeTimeline(p2);
+					parent.getTweets(p2);
 				} else if (-1 != sinceId) {
 					// [.. sinceId=lastId] <tailId ..home.. headId>
 					for (int i = 0; i < home.size(); ++i) {
@@ -74,7 +70,7 @@ public class TwitterHomeTimelineLoaderCallbacks implements
 					Paging p2 = new Paging();
 					p2.setSinceId(sinceId);
 					p2.setMaxId(home.get(home.size() - 1).getId() - 1);
-					parent.getHomeTimeline(p2);
+					parent.getTweets(p2);
 				} else {
 					// <tailId .. home.. headId> [maxId+1 .. lastId]
 					for (int i = 0; i < home.size(); ++i) {

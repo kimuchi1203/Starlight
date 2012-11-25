@@ -27,13 +27,15 @@ public class MainActivity extends FragmentActivity {
 
 	private static final int LOADER_ID_REQUEST_TOKEN = 0;
 	private static final int LOADER_ID_ACCESS_TOKEN = 1;
-	public static final int LOADER_ID_HOME_TIMELINE = 2;
-	public static final int LOADER_ID_LOAD_ICON = 3;
+	public static final int LOADER_ID_LOAD_ICON = 2;
+	public static final int LOADER_ID_HOME_TIMELINE = 3;
+	public static final int LOADER_ID_MENTION = 4;
 
-	public Twitter twitter;
 	private RequestToken requestToken;
+	private AccessToken accessToken;
 	public VirtualStatus loadingStatus;
 	public UserManager userManager;
+	public ViewPager pager;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -43,20 +45,20 @@ public class MainActivity extends FragmentActivity {
 		getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE,
 				R.layout.custom_title);
 
+		accessToken = null;
 		loadingStatus = new VirtualStatus(-1);
-
 		userManager = new UserManager(this);
 
 		MainFragmentPagerAdapter fAdapter = new MainFragmentPagerAdapter(
 				this.getSupportFragmentManager());
-		ViewPager pager = (ViewPager) this.findViewById(R.id.pager);
+		pager = (ViewPager) this.findViewById(R.id.pager);
 		pager.setAdapter(fAdapter);
 
 		// start OAuth button
 		Button btn = (Button) this.findViewById(R.id.login);
 		btn.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
-				twitter = new TwitterFactory().getInstance();
+				Twitter twitter = TwitterFactory.getSingleton();
 				twitter.setOAuthConsumer(ConsumerKey.CONSUMER_KEY,
 						ConsumerKey.CONSUMER_SECRET);
 				doOAuth();
@@ -74,8 +76,8 @@ public class MainActivity extends FragmentActivity {
 		getSupportLoaderManager().restartLoader(
 				LOADER_ID_REQUEST_TOKEN,
 				null,
-				new TwitterRequestTokenLoaderCallbacks(this, twitter,
-						CALLBACK_URL));
+				new TwitterRequestTokenLoaderCallbacks(this, TwitterFactory
+						.getSingleton(), CALLBACK_URL));
 	}
 
 	public void setRequestToken(RequestToken r) {
@@ -91,33 +93,35 @@ public class MainActivity extends FragmentActivity {
 			getSupportLoaderManager().restartLoader(
 					LOADER_ID_ACCESS_TOKEN,
 					null,
-					new TwitterAccessTokenLoaderCallbacks(this, twitter,
-							requestToken, verifier));
+					new TwitterAccessTokenLoaderCallbacks(this, requestToken,
+							verifier));
 		}
 	}
 
 	public boolean loadToken() {
+		if (null != accessToken)
+			return true;
 		SharedPreferences pref = getPreferences(MODE_PRIVATE);
 		String key = pref.getString(KEY_TOKEN, null);
 		String secret = pref.getString(KEY_TOKEN_SECRET, null);
 		if ((key != null) && (secret != null)) {
-			twitter = new TwitterFactory().getInstance();
+			Twitter twitter = TwitterFactory.getSingleton();
 			twitter.setOAuthConsumer(ConsumerKey.CONSUMER_KEY,
 					ConsumerKey.CONSUMER_SECRET);
-			twitter.setOAuthAccessToken(new AccessToken(key, secret));
+			accessToken = new AccessToken(key, secret);
+			twitter.setOAuthAccessToken(accessToken);
 			return true;
 		} else {
 			return false;
 		}
 	}
 
-	public HomeTimelineFragment getCurrentFragment() {
-		ViewPager pager = (ViewPager) findViewById(R.id.pager);
+	public TweetViewFragment getCurrentFragment() {
 		FragmentStatePagerAdapter sAdapter = (FragmentStatePagerAdapter) pager
 				.getAdapter();
 		Object f1 = sAdapter.instantiateItem(pager, pager.getCurrentItem());
-		if (f1 instanceof HomeTimelineFragment) {
-			return (HomeTimelineFragment) f1;
+		if (f1 instanceof TweetViewFragment) {
+			return (TweetViewFragment) f1;
 		} else {
 			return null;
 		}
