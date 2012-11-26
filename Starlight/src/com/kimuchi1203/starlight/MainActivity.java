@@ -58,9 +58,6 @@ public class MainActivity extends FragmentActivity {
 		Button btn = (Button) this.findViewById(R.id.login);
 		btn.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
-				Twitter twitter = TwitterFactory.getSingleton();
-				twitter.setOAuthConsumer(ConsumerKey.CONSUMER_KEY,
-						ConsumerKey.CONSUMER_SECRET);
 				doOAuth();
 			}
 		});
@@ -106,8 +103,6 @@ public class MainActivity extends FragmentActivity {
 		String secret = pref.getString(KEY_TOKEN_SECRET, null);
 		if ((key != null) && (secret != null)) {
 			Twitter twitter = TwitterFactory.getSingleton();
-			twitter.setOAuthConsumer(ConsumerKey.CONSUMER_KEY,
-					ConsumerKey.CONSUMER_SECRET);
 			accessToken = new AccessToken(key, secret);
 			twitter.setOAuthAccessToken(accessToken);
 			return true;
