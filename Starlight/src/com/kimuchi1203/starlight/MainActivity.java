@@ -36,6 +36,7 @@ public class MainActivity extends FragmentActivity {
 	public VirtualStatus loadingStatus;
 	public UserManager userManager;
 	public ViewPager pager;
+	public Twitter twitter;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -70,11 +71,12 @@ public class MainActivity extends FragmentActivity {
 	}
 
 	private void doOAuth() {
+		twitter = new TwitterFactory().getInstance();
 		getSupportLoaderManager().restartLoader(
 				LOADER_ID_REQUEST_TOKEN,
 				null,
-				new TwitterRequestTokenLoaderCallbacks(this, TwitterFactory
-						.getSingleton(), CALLBACK_URL));
+				new TwitterRequestTokenLoaderCallbacks(this, twitter,
+						CALLBACK_URL));
 	}
 
 	public void setRequestToken(RequestToken r) {
@@ -102,7 +104,7 @@ public class MainActivity extends FragmentActivity {
 		String key = pref.getString(KEY_TOKEN, null);
 		String secret = pref.getString(KEY_TOKEN_SECRET, null);
 		if ((key != null) && (secret != null)) {
-			Twitter twitter = TwitterFactory.getSingleton();
+			twitter = new TwitterFactory().getInstance();
 			accessToken = new AccessToken(key, secret);
 			twitter.setOAuthAccessToken(accessToken);
 			return true;
