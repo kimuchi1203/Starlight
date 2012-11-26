@@ -24,16 +24,17 @@ public class HttpDrawableLoader extends AsyncTaskLoader<Map<User, Drawable>> {
 
 	@Override
 	public Map<User, Drawable> loadInBackground() {
-		URL url = user.getProfileImageUrlHttps();
+		String url = user.getProfileImageURLHttps();
 		Drawable d = loadImage(url);
 		HashMap<User, Drawable> m = new HashMap<User, Drawable>();
 		m.put(user, d);
 		return m;
 	}
 
-	private Drawable loadImage(URL url) {
+	private Drawable loadImage(String urlString) {
 		Drawable d = null;
 		try {
+			URL url = new URL(urlString);
 			HttpURLConnection http = (HttpURLConnection) url.openConnection();
 			http.setRequestMethod("GET");
 			http.connect();

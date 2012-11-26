@@ -41,13 +41,13 @@ public class TwitterHomeTimelineLoader extends
 		} else if (MainActivity.LOADER_ID_MENTION == id) {
 			if (null != paging) {
 				try {
-					home = twitter.getMentions(paging);
+					home = twitter.getMentionsTimeline(paging);
 				} catch (TwitterException e) {
 					e.printStackTrace();
 				}
 			} else {
 				try {
-					home = twitter.getMentions();
+					home = twitter.getMentionsTimeline();
 				} catch (TwitterException e) {
 					e.printStackTrace();
 				}

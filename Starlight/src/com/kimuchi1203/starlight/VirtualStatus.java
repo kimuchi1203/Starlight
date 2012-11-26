@@ -2,7 +2,6 @@ package com.kimuchi1203.starlight;
 
 import java.util.Date;
 
-import twitter4j.Annotations;
 import twitter4j.GeoLocation;
 import twitter4j.HashtagEntity;
 import twitter4j.MediaEntity;
@@ -13,7 +12,6 @@ import twitter4j.URLEntity;
 import twitter4j.User;
 import twitter4j.UserMentionEntity;
 
-@SuppressWarnings("deprecation")
 public class VirtualStatus implements Status {
 
 	/**
@@ -64,12 +62,6 @@ public class VirtualStatus implements Status {
 
 	@Override
 	public UserMentionEntity[] getUserMentionEntities() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Annotations getAnnotations() {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -171,6 +163,18 @@ public class VirtualStatus implements Status {
 
 	@Override
 	public boolean isTruncated() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public long getCurrentUserRetweetId() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public boolean isPossiblySensitive() {
 		// TODO Auto-generated method stub
 		return false;
 	}
