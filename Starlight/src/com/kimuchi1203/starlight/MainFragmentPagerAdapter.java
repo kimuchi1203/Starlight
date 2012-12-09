@@ -7,11 +7,11 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 
 public class MainFragmentPagerAdapter extends FragmentStatePagerAdapter {
-	public ArrayList<TweetViewFragment> fragmentList;
+	public ArrayList<Fragment> fragmentList;
 
 	public MainFragmentPagerAdapter(FragmentManager fm) {
 		super(fm);
-		fragmentList = new ArrayList<TweetViewFragment>();
+		fragmentList = new ArrayList<Fragment>();
 		fragmentList.add(new HomeTimelineFragment());
 		fragmentList.add(new MentionFragment());
 	}
@@ -23,6 +23,15 @@ public class MainFragmentPagerAdapter extends FragmentStatePagerAdapter {
 			fragment = fragmentList.get(position);
 		}
 		return fragment;
+	}
+
+	@Override
+	public int getItemPosition(Object object) {
+		int pos = fragmentList.indexOf(object);
+		if (-1 == pos) {
+			pos = FragmentStatePagerAdapter.POSITION_NONE;
+		}
+		return pos;
 	}
 
 	@Override

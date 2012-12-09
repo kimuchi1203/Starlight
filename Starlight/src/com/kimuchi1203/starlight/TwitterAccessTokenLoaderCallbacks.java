@@ -5,6 +5,7 @@ import twitter4j.auth.RequestToken;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.Loader;
 
@@ -47,9 +48,9 @@ public class TwitterAccessTokenLoaderCallbacks implements
 		// reset all fragment.listview.adapter
 		MainFragmentPagerAdapter adapter = (MainFragmentPagerAdapter) parent.pager
 				.getAdapter();
-		for (TweetViewFragment f : adapter.fragmentList) {
-			f.resetTweets();
-			f.getTweets(null);
+		for (Fragment f : adapter.fragmentList) {
+			((TweetViewInterface) f).resetTweets();
+			((TweetViewInterface) f).getTweets(null);
 		}
 	}
 

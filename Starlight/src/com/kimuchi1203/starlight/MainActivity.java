@@ -20,10 +20,9 @@ import android.widget.Button;
 public class MainActivity extends FragmentActivity {
 
 	private static final String CALLBACK_URL = "callback://host";
-
 	private static final String OAUTH_VERIFIER = "oauth_verifier";
-	private static final String KEY_TOKEN = "token";
-	private static final String KEY_TOKEN_SECRET = "token_secret";
+	public static final String KEY_TOKEN = "token";
+	public static final String KEY_TOKEN_SECRET = "token_secret";
 
 	private static final int LOADER_ID_REQUEST_TOKEN = 0;
 	private static final int LOADER_ID_ACCESS_TOKEN = 1;
@@ -32,8 +31,8 @@ public class MainActivity extends FragmentActivity {
 	public static final int LOADER_ID_MENTION = 4;
 
 	private RequestToken requestToken;
-	private AccessToken accessToken;
-	public VirtualStatus loadingStatus;
+	private AccessToken accessToken = null;
+	public static final VirtualStatus loadingStatus = new VirtualStatus(-1);
 	public UserManager userManager;
 	public ViewPager pager;
 	public Twitter twitter;
@@ -47,7 +46,6 @@ public class MainActivity extends FragmentActivity {
 				R.layout.custom_title);
 
 		accessToken = null;
-		loadingStatus = new VirtualStatus(-1);
 		userManager = new UserManager(this);
 
 		MainFragmentPagerAdapter fAdapter = new MainFragmentPagerAdapter(
@@ -113,12 +111,12 @@ public class MainActivity extends FragmentActivity {
 		}
 	}
 
-	public TweetViewFragment getCurrentFragment() {
+	public TweetViewInterface getCurrentFragment() {
 		FragmentStatePagerAdapter sAdapter = (FragmentStatePagerAdapter) pager
 				.getAdapter();
 		Object f1 = sAdapter.instantiateItem(pager, pager.getCurrentItem());
-		if (f1 instanceof TweetViewFragment) {
-			return (TweetViewFragment) f1;
+		if (f1 instanceof TweetViewInterface) {
+			return (TweetViewInterface) f1;
 		} else {
 			return null;
 		}
