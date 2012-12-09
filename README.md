@@ -15,3 +15,8 @@ Starlight - Twitter client for Android
    * make src/com/kimuchi1203/starlight/ConsumerKey.java  
      (cf. src/com/kimuchi1203/starlight/template_ConsumerKey.java)
 
+***
+Starlight is using Twitter4J.  
+Twitter4J Copyright (c) 2007-2012, Yusuke Yamamoto All rights reserved.   
+Twitter4J includes software of JSON.org (The JSON License - [http://www.json.org/license.html](http://www.json.org/license.html))  
+
